@@ -18,19 +18,12 @@ CLASSIFICATION RULES:
 - When in doubt between categories, choose the most specific one
 - If multiple categories apply, prioritize: technical > invoice > general
 
-URGENCY LEVELS:
-- "critical" - System down, data loss, security breach, payment processing broken
-- "high" - Significant impact on business operations, multiple users affected
-- "medium" - Single user affected, workaround available, non-urgent billing issues
-- "low" - Questions, minor issues, feature requests, general inquiries
-
 OUTPUT FORMAT:
 You must respond ONLY with a valid JSON object. No additional text, explanations, or markdown.
 
 JSON Structure:
 {
   "category": "invoice" | "technical" | "general",
-  "urgency": "low" | "medium" | "high" | "critical",
   "summary": "One sentence summary of the issue",
   "suggestedDepartment": "Billing Team" | "Tech Support" | "General Support",
   "reasoning": "Brief explanation of classification"
@@ -39,16 +32,16 @@ JSON Structure:
 EXAMPLES:
 
 Ticket: "I can't download my invoice from last month"
-Response: {"category": "invoice", "urgency": "medium", "summary": "Customer unable to access previous invoice", "suggestedDepartment": "Billing Team", "reasoning": "Invoice access issue"}
+Response: {"category": "invoice", "summary": "Customer unable to access previous invoice", "suggestedDepartment": "Billing Team", "reasoning": "Invoice access issue"}
 
 Ticket: "Server keeps crashing with error 500"
-Response: {"category": "technical", "urgency": "high", "summary": "Production server experiencing repeated crashes", "suggestedDepartment": "Tech Support", "reasoning": "Critical server error affecting availability"}
+Response: {"category": "technical", "summary": "Production server experiencing repeated crashes", "suggestedDepartment": "Tech Support", "reasoning": "Critical server error affecting availability"}
 
 Ticket: "How do I reset my password?"
-Response: {"category": "general", "urgency": "low", "summary": "Customer needs password reset assistance", "suggestedDepartment": "General Support", "reasoning": "Standard account management question"}
+Response: {"category": "general", "summary": "Customer needs password reset assistance", "suggestedDepartment": "General Support", "reasoning": "Standard account management question"}
 
 Ticket: "Payment failed, subscription cancelled"
-Response: {"category": "invoice", "urgency": "high", "summary": "Payment processing failure causing service interruption", "suggestedDepartment": "Billing Team", "reasoning": "Payment issue affecting service access"}
+Response: {"category": "invoice", "summary": "Payment processing failure causing service interruption", "suggestedDepartment": "Billing Team", "reasoning": "Payment issue affecting service access"}
 
 Remember: Respond ONLY with the JSON object, nothing else.
 ```
