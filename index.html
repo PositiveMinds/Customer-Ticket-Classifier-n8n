@@ -541,17 +541,6 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="priority" class="form-label fw-semibold">
-                                <i class="bi bi-flag"></i> Priority Level
-                            </label>
-                            <select class="form-select" id="priority">
-                                <option value="normal" selected>Normal - Standard support request</option>
-                                <option value="high">High - Impacts business operations</option>
-                                <option value="urgent">Urgent - Critical issue requiring immediate attention</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
                             <label for="subject" class="form-label fw-semibold">
                                 <i class="bi bi-chat-square-text"></i> Subject <span class="text-danger">*</span>
                             </label>
@@ -583,18 +572,15 @@
                         <h6 class="alert-heading"><i class="bi bi-check-circle-fill"></i> Ticket Submitted Successfully!</h6>
                         <hr>
                         <div class="row small">
-                            <div class="col-md-6 mb-2">
-                                <strong>Ticket ID:</strong> <span id="responseTicketId" class="text-primary fw-bold"></span>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <strong>Category:</strong> <span id="responseCategory" class="badge bg-info"></span>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <strong>Urgency:</strong> <span id="responseUrgency" class="badge bg-warning"></span>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <strong>Department:</strong> <span id="responseDepartment"></span>
-                            </div>
+                        <div class="col-md-6 mb-2">
+                        <strong>Ticket ID:</strong> <span id="responseTicketId" class="text-primary fw-bold"></span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                        <strong>Category:</strong> <span id="responseCategory" class="badge bg-info"></span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                        <strong>Department:</strong> <span id="responseDepartment"></span>
+                        </div>
                         </div>
                         <p class="mb-0 mt-2 small"><i class="bi bi-envelope-check"></i> A confirmation email has been sent to your inbox.</p>
                     </div>
@@ -659,11 +645,10 @@
             errorAlert.classList.add('d-none');
             
             const ticketData = {
-                customerName: document.getElementById('customerName').value,
-                customerEmail: document.getElementById('customerEmail').value,
-                priority: document.getElementById('priority').value,
-                subject: document.getElementById('subject').value,
-                description: document.getElementById('description').value
+            customerName: document.getElementById('customerName').value,
+            customerEmail: document.getElementById('customerEmail').value,
+            subject: document.getElementById('subject').value,
+            description: document.getElementById('description').value
             };
 
             try {
@@ -680,10 +665,9 @@
                 loadingSpinner.classList.add('d-none');
 
                 if (result.success) {
-                    document.getElementById('responseTicketId').textContent = result.ticketId;
-                    document.getElementById('responseCategory').textContent = result.category.toUpperCase();
-                    document.getElementById('responseUrgency').textContent = result.urgency.toUpperCase();
-                    document.getElementById('responseDepartment').textContent = result.message.split('routed to ')[1] || 'Support Team';
+                document.getElementById('responseTicketId').textContent = result.ticketId;
+                document.getElementById('responseCategory').textContent = result.category.toUpperCase();
+                document.getElementById('responseDepartment').textContent = result.message.split('routed to ')[1] || 'Support Team';
                     
                     successAlert.classList.remove('d-none');
                     this.reset();
