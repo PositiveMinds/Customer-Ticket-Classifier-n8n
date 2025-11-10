@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechForge Solutions - Support Ticket System</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --dark-color: #1e293b;
+            --light-color: #f8fafc;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 120px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23ffffff"></path><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="%23ffffff"></path><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%23ffffff"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            opacity: 0.1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary-color);
+            border: none;
+            padding: 12px 35px;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background: var(--light-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline-light {
+            border: 2px solid white;
+            padding: 12px 35px;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn-outline-light:hover {
+            background: white;
+            color: var(--primary-color);
+            transform: translateY(-3px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 15px;
+        }
+
+        .section-subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+        }
+
+        .service-card {
+            padding: 40px 30px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+            border: 1px solid #e2e8f0;
+        }
+
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(37, 99, 235, 0.15);
+        }
+
+        .service-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .service-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .service-description {
+            color: #64748b;
+            line-height: 1.7;
+        }
+
+        .stats-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 60px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .cta-section {
+            background: var(--light-color);
+            padding: 80px 0;
+        }
+
+        footer {
+            background: var(--dark-color);
+            color: white;
+            padding: 40px 0 20px;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-lg {
+            max-width: 700px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            padding: 10px 14px;
+        }
+
+        .alert-info {
+            background-color: #e0f2fe;
+            border-color: #7dd3fc;
+            color: #075985;
+        }
+
+        #webhookConfig input {
+            font-size: 0.875rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="bi bi-code-slash"></i> TechForge</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-primary text-white px-4 ms-2" href="#" data-bs-toggle="modal" data-bs-target="#supportModal">
+                            <i class="bi bi-headset"></i> Support
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section id="home" class="hero-section">
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="hero-title">Building Digital Solutions for Tomorrow</h1>
+                    <p class="hero-subtitle">Transform your business with cutting-edge software development, AI integration, and cloud solutions.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#supportModal">
+                            <i class="bi bi-headset"></i> Submit Support Ticket
+                        </button>
+                        <button class="btn btn-outline-light btn-lg" onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'})">
+                            Learn More
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6 text-center mt-5 mt-lg-0" data-aos="fade-left">
+                    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=600&fit=crop" alt="Software Development" class="img-fluid rounded shadow-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" class="py-5" style="padding: 80px 0;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title" data-aos="fade-up">Our Services</h2>
+                <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Comprehensive software solutions tailored to your needs</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-code-square"></i>
+                        </div>
+                        <h3 class="service-title">Custom Software Development</h3>
+                        <p class="service-description">Build scalable, secure, and high-performance applications tailored to your business requirements.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-phone"></i>
+                        </div>
+                        <h3 class="service-title">Mobile App Development</h3>
+                        <p class="service-description">Create engaging iOS and Android applications with seamless user experiences and modern design.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-cloud"></i>
+                        </div>
+                        <h3 class="service-title">Cloud Solutions</h3>
+                        <p class="service-description">Migrate and optimize your infrastructure with AWS, Azure, and Google Cloud platforms.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="400">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-robot"></i>
+                        </div>
+                        <h3 class="service-title">AI & Machine Learning</h3>
+                        <p class="service-description">Leverage artificial intelligence to automate processes and gain valuable insights from your data.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="500">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <h3 class="service-title">Cybersecurity</h3>
+                        <p class="service-description">Protect your digital assets with comprehensive security audits and implementation strategies.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="600">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h3 class="service-title">Digital Transformation</h3>
+                        <p class="service-description">Modernize your business operations with innovative technology solutions and consulting.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 col-6 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="100">
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Projects Completed</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-4 mb-md-0" data-aos="fade-up" data-aos-delay="200">
+                    <div class="stat-item">
+                        <div class="stat-number">250+</div>
+                        <div class="stat-label">Happy Clients</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="stat-item">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">Team Members</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="stat-item">
+                        <div class="stat-number">10+</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-5" style="padding: 80px 0;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
+                    <h2 class="section-title">Why Choose TechForge?</h2>
+                    <p class="lead mb-4">We are a team of passionate developers, designers, and strategists committed to delivering excellence.</p>
+                    <ul class="list-unstyled">
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-primary me-2"></i> Expert team with 10+ years of experience</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-primary me-2"></i> Agile development methodology</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-primary me-2"></i> 24/7 customer support</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-primary me-2"></i> Competitive pricing and timely delivery</li>
+                        <li class="mb-3"><i class="bi bi-check-circle-fill text-primary me-2"></i> Long-term maintenance and support</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&h=600&fit=crop" alt="Professional Team Working" class="img-fluid rounded shadow-lg">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="cta-section">
+        <div class="container text-center">
+            <h2 class="section-title" data-aos="fade-up">Ready to Start Your Project?</h2>
+            <p class="section-subtitle" data-aos="fade-up" data-aos-delay="100">Let's discuss how we can help transform your ideas into reality</p>
+            <div data-aos="fade-up" data-aos-delay="200">
+                <button class="btn btn-primary btn-lg me-3 pulse-animation">Contact Us</button>
+                <button class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#supportModal">Get Support</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="mb-3"><i class="bi bi-code-slash"></i> TechForge Solutions</h5>
+                    <p class="text-muted">Building innovative software solutions for businesses worldwide.</p>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h5 class="mb-3">Quick Links</h5>
+                    <ul class="list-unstyled footer-links">
+                        <li class="mb-2"><a href="#services">Services</a></li>
+                        <li class="mb-2"><a href="#about">About Us</a></li>
+                        <li class="mb-2"><a href="#contact">Contact</a></li>
+                        <li class="mb-2"><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5 class="mb-3">Connect With Us</h5>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-muted fs-4"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="text-muted fs-4"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-muted fs-4"><i class="bi bi-github"></i></a>
+                        <a href="#" class="text-muted fs-4"><i class="bi bi-facebook"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 bg-secondary">
+            <div class="text-center text-muted">
+                <p>&copy; 2025 TechForge Solutions. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supportModalLabel"><i class="bi bi-headset me-2"></i>AI-Powered Support Ticket System</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    
+                    <div class="alert alert-info mb-4" id="webhookConfigAlert">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small><i class="bi bi-info-circle"></i> <strong>Webhook URL:</strong> <span id="webhookUrlDisplay">Not configured</span></small>
+                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#webhookConfig">
+                                Configure
+                            </button>
+                        </div>
+                        <div class="collapse mt-2" id="webhookConfig">
+                            <input type="text" class="form-control form-control-sm" id="webhookUrlInput" placeholder="https://your-n8n-instance.com/webhook/support-ticket">
+                            <button class="btn btn-sm btn-primary mt-2" onclick="saveWebhookUrl()">Save</button>
+                        </div>
+                    </div>
+
+                    <form id="supportForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="customerName" class="form-label fw-semibold">
+                                    <i class="bi bi-person"></i> Your Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="customerName" placeholder="John Doe" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="customerEmail" class="form-label fw-semibold">
+                                    <i class="bi bi-envelope"></i> Email Address <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" class="form-control" id="customerEmail" placeholder="john@example.com" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="priority" class="form-label fw-semibold">
+                                <i class="bi bi-flag"></i> Priority Level
+                            </label>
+                            <select class="form-select" id="priority">
+                                <option value="normal" selected>Normal - Standard support request</option>
+                                <option value="high">High - Impacts business operations</option>
+                                <option value="urgent">Urgent - Critical issue requiring immediate attention</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="subject" class="form-label fw-semibold">
+                                <i class="bi bi-chat-square-text"></i> Subject <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="subject" placeholder="Brief description of your issue" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-semibold">
+                                <i class="bi bi-card-text"></i> Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="description" rows="5" placeholder="Please provide detailed information about your issue..." required></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="bi bi-send"></i> Submit Ticket
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3 d-none" id="loadingSpinner">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Processing...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Processing your ticket with AI...</p>
+                    </div>
+
+                    <div class="alert alert-success mt-3 d-none" id="successAlert">
+                        <h6 class="alert-heading"><i class="bi bi-check-circle-fill"></i> Ticket Submitted Successfully!</h6>
+                        <hr>
+                        <div class="row small">
+                            <div class="col-md-6 mb-2">
+                                <strong>Ticket ID:</strong> <span id="responseTicketId" class="text-primary fw-bold"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Category:</strong> <span id="responseCategory" class="badge bg-info"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Urgency:</strong> <span id="responseUrgency" class="badge bg-warning"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Department:</strong> <span id="responseDepartment"></span>
+                            </div>
+                        </div>
+                        <p class="mb-0 mt-2 small"><i class="bi bi-envelope-check"></i> A confirmation email has been sent to your inbox.</p>
+                    </div>
+
+                    <div class="alert alert-danger mt-3 d-none" id="errorAlert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <span id="errorMessage"></span>
+                    </div>
+
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <small class="text-muted">
+                            <i class="bi bi-robot"></i> <strong>AI-Powered System:</strong> Our intelligent system automatically classifies your ticket and routes it to the right department for faster resolution.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+
+        let webhookUrl = localStorage.getItem('n8nWebhookUrl') || '';
+        
+        function saveWebhookUrl() {
+            const url = document.getElementById('webhookUrlInput').value;
+            localStorage.setItem('n8nWebhookUrl', url);
+            webhookUrl = url;
+            document.getElementById('webhookUrlDisplay').textContent = url || 'Not configured';
+            const collapse = bootstrap.Collapse.getInstance(document.getElementById('webhookConfig'));
+            if (collapse) collapse.hide();
+        }
+
+        if (webhookUrl) {
+            document.getElementById('webhookUrlDisplay').textContent = webhookUrl;
+        }
+
+        document.getElementById('supportForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!webhookUrl) {
+                document.getElementById('errorMessage').textContent = 'Please configure the webhook URL first.';
+                document.getElementById('errorAlert').classList.remove('d-none');
+                return;
+            }
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const successAlert = document.getElementById('successAlert');
+            const errorAlert = document.getElementById('errorAlert');
+            
+            submitBtn.disabled = true;
+            loadingSpinner.classList.remove('d-none');
+            successAlert.classList.add('d-none');
+            errorAlert.classList.add('d-none');
+            
+            const ticketData = {
+                customerName: document.getElementById('customerName').value,
+                customerEmail: document.getElementById('customerEmail').value,
+                priority: document.getElementById('priority').value,
+                subject: document.getElementById('subject').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                const response = await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(ticketData)
+                });
+
+                const result = await response.json();
+
+                loadingSpinner.classList.add('d-none');
+
+                if (result.success) {
+                    document.getElementById('responseTicketId').textContent = result.ticketId;
+                    document.getElementById('responseCategory').textContent = result.category.toUpperCase();
+                    document.getElementById('responseUrgency').textContent = result.urgency.toUpperCase();
+                    document.getElementById('responseDepartment').textContent = result.message.split('routed to ')[1] || 'Support Team';
+                    
+                    successAlert.classList.remove('d-none');
+                    this.reset();
+                    
+                    setTimeout(() => {
+                        successAlert.classList.add('d-none');
+                    }, 10000);
+                } else {
+                    throw new Error(result.error || 'Failed to submit ticket');
+                }
+            } catch (error) {
+                loadingSpinner.classList.add('d-none');
+                document.getElementById('errorMessage').textContent = error.message || 'Unable to submit ticket. Please try again or contact support directly.';
+                errorAlert.classList.remove('d-none');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

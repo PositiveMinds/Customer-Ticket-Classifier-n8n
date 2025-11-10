@@ -1,0 +1,598 @@
+{
+  "name": "AI Support Ticket Routing System",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "support-ticket-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const ticketId = `TKT-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;\nconst timestamp = new Date().toISOString();\nconst startTime = Date.now();\n\nreturn {\n  ticketId,\n  timestamp,\n  startTime,\n  subject: $input.item.json.subject,\n  description: $input.item.json.description,\n  customerEmail: $input.item.json.customerEmail,\n  customerName: $input.item.json.customerName || 'Customer',\n  priority: $input.item.json.priority || 'normal'\n};"
+      },
+      "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+      "name": "Generate Ticket ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "create",
+        "model": "gpt-4-turbo-preview",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a support ticket classifier. Analyze the ticket and respond ONLY with a JSON object containing:\n- category: one of 'invoice', 'technical', 'general'\n- urgency: one of 'low', 'medium', 'high', 'critical'\n- summary: brief one-sentence summary\n- suggestedDepartment: department name"
+            },
+            {
+              "role": "user",
+              "content": "=Subject: {{ $json.subject }}\n\nDescription: {{ $json.description }}\n\nClassify this support ticket."
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3,
+          "maxTokens": 200
+        }
+      },
+      "id": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "name": "OpenAI Classifier",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "1",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = JSON.parse($input.item.json.message.content);\nconst previousData = $node[\"Generate Ticket ID\"].json;\n\nreturn {\n  ...previousData,\n  category: aiResponse.category,\n  urgency: aiResponse.urgency,\n  summary: aiResponse.summary,\n  department: aiResponse.suggestedDepartment,\n  aiAnalysis: aiResponse\n};"
+      },
+      "id": "d4e5f6a7-b8c9-0123-def1-234567890123",
+      "name": "Parse AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.category }}",
+              "operation": "equals",
+              "value2": "invoice"
+            }
+          ]
+        }
+      },
+      "id": "e5f6a7b8-c9d0-1234-ef12-345678901234",
+      "name": "IF Invoice",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 180]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.category }}",
+              "operation": "equals",
+              "value2": "technical"
+            }
+          ]
+        }
+      },
+      "id": "f6a7b8c9-d0e1-2345-f123-456789012345",
+      "name": "IF Technical",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.category }}",
+              "operation": "equals",
+              "value2": "general"
+            }
+          ]
+        }
+      },
+      "id": "a7b8c9d0-e1f2-3456-1234-567890123456",
+      "name": "IF General",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1120, 420]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "billing-team",
+          "mode": "name"
+        },
+        "text": "=🧾 *New Invoice Ticket* [{{ $json.urgency.toUpperCase() }}]\n\n*Ticket ID:* {{ $json.ticketId }}\n*From:* {{ $json.customerName }} ({{ $json.customerEmail }})\n*Subject:* {{ $json.subject }}\n*AI Summary:* {{ $json.summary }}\n\n*Description:*\n{{ $json.description }}",
+        "otherOptions": {}
+      },
+      "id": "b8c9d0e1-f2a3-4567-2345-678901234567",
+      "name": "Slack Billing",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1340, 180],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "2",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "tech-support",
+          "mode": "name"
+        },
+        "text": "=🔧 *New Technical Ticket* [{{ $json.urgency.toUpperCase() }}]\n\n*Ticket ID:* {{ $json.ticketId }}\n*From:* {{ $json.customerName }} ({{ $json.customerEmail }})\n*Subject:* {{ $json.subject }}\n*AI Summary:* {{ $json.summary }}\n\n*Description:*\n{{ $json.description }}",
+        "otherOptions": {}
+      },
+      "id": "c9d0e1f2-a3b4-5678-3456-789012345678",
+      "name": "Slack Tech",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1340, 300],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "2",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "general-support",
+          "mode": "name"
+        },
+        "text": "=💬 *New General Ticket* [{{ $json.urgency.toUpperCase() }}]\n\n*Ticket ID:* {{ $json.ticketId }}\n*From:* {{ $json.customerName }} ({{ $json.customerEmail }})\n*Subject:* {{ $json.subject }}\n*AI Summary:* {{ $json.summary }}\n\n*Description:*\n{{ $json.description }}",
+        "otherOptions": {}
+      },
+      "id": "d0e1f2a3-b4c5-6789-4567-890123456789",
+      "name": "Slack General",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [1340, 420],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "2",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Support Tickets"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ticketId": "={{ $json.ticketId }}",
+            "timestamp": "={{ $json.timestamp }}",
+            "customerName": "={{ $json.customerName }}",
+            "customerEmail": "={{ $json.customerEmail }}",
+            "subject": "={{ $json.subject }}",
+            "description": "={{ $json.description }}",
+            "category": "={{ $json.category }}",
+            "urgency": "={{ $json.urgency }}",
+            "department": "={{ $json.department }}",
+            "summary": "={{ $json.summary }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "e1f2a3b4-c5d6-7890-5678-901234567890",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [900, 500],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3",
+          "name": "Google Sheets API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.customerEmail }}",
+        "subject": "=Support Ticket Received: {{ $json.ticketId }}",
+        "emailType": "html",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }\n    .container { max-width: 600px; margin: 0 auto; padding: 20px; }\n    .header { background: linear-gradient(135deg, #2563eb, #1e40af); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }\n    .content { background: #f9fafb; padding: 30px; }\n    .ticket-box { background: white; padding: 20px; margin: 20px 0; border-left: 4px solid #2563eb; border-radius: 5px; }\n    .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #6b7280; }\n    .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }\n    .badge-{{ $json.urgency }} { background: #fef3c7; color: #92400e; }\n  </style>\n</head>\n<body>\n  <div class=\"container\">\n    <div class=\"header\">\n      <h1>🎫 Ticket Received</h1>\n    </div>\n    <div class=\"content\">\n      <p>Dear <strong>{{ $json.customerName }}</strong>,</p>\n      <p>Thank you for contacting TechForge Solutions. We've received your support ticket and our team is already on it!</p>\n      \n      <div class=\"ticket-box\">\n        <h3 style=\"margin-top: 0; color: #2563eb;\">Ticket Details</h3>\n        <p><strong>Ticket ID:</strong> {{ $json.ticketId }}</p>\n        <p><strong>Category:</strong> {{ $json.category | upper }}</p>\n        <p><strong>Priority:</strong> <span class=\"badge badge-{{ $json.urgency }}\">{{ $json.urgency | upper }}</span></p>\n        <p><strong>Department:</strong> {{ $json.department }}</p>\n        <p><strong>Created:</strong> {{ $json.timestamp }}</p>\n      </div>\n      \n      <p><strong>Your Issue:</strong></p>\n      <p style=\"background: white; padding: 15px; border-radius: 5px;\">{{ $json.subject }}</p>\n      \n      <h4>Expected Response Time:</h4>\n      <ul>\n        <li>🔴 Critical: 1 hour</li>\n        <li>🟠 High: 4 hours</li>\n        <li>🟡 Medium: 24 hours</li>\n        <li>🟢 Low: 48 hours</li>\n      </ul>\n      \n      <p>Our <strong>{{ $json.department }}</strong> will respond to you shortly.</p>\n    </div>\n    <div class=\"footer\">\n      <p>TechForge Solutions | support@techforge.com | www.techforge.com</p>\n      <p>This is an automated message. Please do not reply to this email.</p>\n    </div>\n  </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "id": "f2a3b4c5-d6e7-8901-6789-012345678901",
+      "name": "Gmail Confirmation",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1560, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const endTime = Date.now();\nconst responseTime = endTime - $json.startTime;\n\nconst logEntry = {\n  timestamp: new Date().toISOString(),\n  ticketId: $json.ticketId,\n  category: $json.category,\n  urgency: $json.urgency,\n  department: $json.department,\n  responseTimeMs: responseTime,\n  status: 'success'\n};\n\nconsole.log('📊 MONITORING LOG:', JSON.stringify(logEntry));\n\nreturn {\n  ...$json,\n  monitoring: logEntry\n};"
+      },
+      "id": "a3b4c5d6-e7f8-9012-7890-123456789012",
+      "name": "Monitoring Log",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_GOOGLE_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=1",
+          "mode": "list",
+          "cachedResultName": "Monitoring"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "timestamp": "={{ $json.monitoring.timestamp }}",
+            "ticketId": "={{ $json.monitoring.ticketId }}",
+            "category": "={{ $json.monitoring.category }}",
+            "urgency": "={{ $json.monitoring.urgency }}",
+            "responseTimeMs": "={{ $json.monitoring.responseTimeMs }}",
+            "status": "={{ $json.monitoring.status }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "b4c5d6e7-f8a9-0123-8901-234567890123",
+      "name": "Log to Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [2000, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3",
+          "name": "Google Sheets API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": true,\n  \"ticketId\": $json.ticketId,\n  \"category\": $json.category,\n  \"urgency\": $json.urgency,\n  \"message\": \"Your ticket has been received and routed to \" + $json.department\n} }}",
+        "options": {}
+      },
+      "id": "c5d6e7f8-a9b0-1234-9012-345678901234",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2220, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const error = $input.item.json.error || $input.item.json;\nconst timestamp = new Date().toISOString();\n\nreturn {\n  errorType: 'workflow_error',\n  timestamp,\n  errorMessage: error.message || JSON.stringify(error),\n  nodeName: $executionMode || 'Unknown',\n  ticketData: $input.item.json\n};"
+      },
+      "id": "d6e7f8a9-b0c1-2345-0123-456789012345",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "alerts",
+          "mode": "name"
+        },
+        "text": "=🚨 *WORKFLOW ERROR ALERT*\n\n*Error:* {{ $json.errorMessage }}\n*Time:* {{ $json.timestamp }}\n*Type:* {{ $json.errorType }}\n\n*Ticket Data:*\n```{{ JSON.stringify($json.ticketData, null, 2) }}```",
+        "otherOptions": {}
+      },
+      "id": "e7f8a9b0-c1d2-3456-1234-567890123456",
+      "name": "Slack Error Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.1,
+      "position": [900, 500],
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "2",
+          "name": "Slack API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "admin@techforge.com",
+        "subject": "=🚨 Support System Error: {{ $json.errorType }}",
+        "emailType": "html",
+        "message": "=<h2>Workflow Error Alert</h2>\n<p><strong>Time:</strong> {{ $json.timestamp }}</p>\n<p><strong>Error:</strong> {{ $json.errorMessage }}</p>\n<h3>Ticket Data:</h3>\n<pre>{{ JSON.stringify($json.ticketData, null, 2) }}</pre>",
+        "options": {}
+      },
+      "id": "f8a9b0c1-d2e3-4567-2345-678901234567",
+      "name": "Gmail Error Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1120, 500],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {\n  \"success\": false,\n  \"error\": \"An error occurred processing your ticket. Our team has been notified.\",\n  \"timestamp\": $json.timestamp\n} }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "a9b0c1d2-e3f4-5678-3456-789012345678",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1340, 500]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Ticket ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Ticket ID": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Classifier": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "IF Invoice",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF Technical",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF General",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Invoice": {
+      "main": [
+        [
+          {
+            "node": "Slack Billing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Technical": {
+      "main": [
+        [
+          {
+            "node": "Slack Tech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF General": {
+      "main": [
+        [
+          {
+            "node": "Slack General",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Billing": {
+      "main": [
+        [
+          {
+            "node": "Gmail Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Tech": {
+      "main": [
+        [
+          {
+            "node": "Gmail Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack General": {
+      "main": [
+        [
+          {
+            "node": "Gmail Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Monitoring Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitoring Log": {
+      "main": [
+        [
+          {
+            "node": "Log to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log to Sheets": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Slack Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Error Alert": {
+      "main": [
+        [
+          {
+            "node": "Gmail Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Error Alert": {
+      "main": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-10T00:00:00.000Z",
+  "versionId": "1"
+}
