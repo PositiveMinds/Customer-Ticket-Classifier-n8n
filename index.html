@@ -511,20 +511,7 @@
                 </div>
                 <div class="modal-body p-4">
                     
-                    <div class="alert alert-info mb-4" id="webhookConfigAlert">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small><i class="bi bi-info-circle"></i> <strong>Webhook URL:</strong> <span id="webhookUrlDisplay">Not configured</span></small>
-                            <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#webhookConfig">
-                                Configure
-                            </button>
-                        </div>
-                        <div class="collapse mt-2" id="webhookConfig">
-                            <input type="text" class="form-control form-control-sm" id="webhookUrlInput" placeholder="https://your-n8n-instance.com/webhook/support-ticket">
-                            <button class="btn btn-sm btn-primary mt-2" onclick="saveWebhookUrl()">Save</button>
-                        </div>
-                    </div>
-
-                    <form id="supportForm">
+                    <form id="supportForm" method="POST" action="">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="customerName" class="form-label fw-semibold">
@@ -572,15 +559,18 @@
                         <h6 class="alert-heading"><i class="bi bi-check-circle-fill"></i> Ticket Submitted Successfully!</h6>
                         <hr>
                         <div class="row small">
-                        <div class="col-md-6 mb-2">
-                        <strong>Ticket ID:</strong> <span id="responseTicketId" class="text-primary fw-bold"></span>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                        <strong>Category:</strong> <span id="responseCategory" class="badge bg-info"></span>
-                        </div>
-                        <div class="col-md-6 mb-2">
-                        <strong>Department:</strong> <span id="responseDepartment"></span>
-                        </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Ticket ID:</strong> <span id="responseTicketId" class="text-primary fw-bold"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Category:</strong> <span id="responseCategory" class="badge bg-info"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Urgency:</strong> <span id="responseUrgency" class="badge bg-warning"></span>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Department:</strong> <span id="responseDepartment"></span>
+                            </div>
                         </div>
                         <p class="mb-0 mt-2 small"><i class="bi bi-envelope-check"></i> A confirmation email has been sent to your inbox.</p>
                     </div>
@@ -610,82 +600,7 @@
             offset: 100
         });
 
-        let webhookUrl = localStorage.getItem('n8nWebhookUrl') || '';
         
-        function saveWebhookUrl() {
-            const url = document.getElementById('webhookUrlInput').value;
-            localStorage.setItem('n8nWebhookUrl', url);
-            webhookUrl = url;
-            document.getElementById('webhookUrlDisplay').textContent = url || 'Not configured';
-            const collapse = bootstrap.Collapse.getInstance(document.getElementById('webhookConfig'));
-            if (collapse) collapse.hide();
-        }
-
-        if (webhookUrl) {
-            document.getElementById('webhookUrlDisplay').textContent = webhookUrl;
-        }
-
-        document.getElementById('supportForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (!webhookUrl) {
-                document.getElementById('errorMessage').textContent = 'Please configure the webhook URL first.';
-                document.getElementById('errorAlert').classList.remove('d-none');
-                return;
-            }
-
-            const submitBtn = document.getElementById('submitBtn');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const successAlert = document.getElementById('successAlert');
-            const errorAlert = document.getElementById('errorAlert');
-            
-            submitBtn.disabled = true;
-            loadingSpinner.classList.remove('d-none');
-            successAlert.classList.add('d-none');
-            errorAlert.classList.add('d-none');
-            
-            const ticketData = {
-            customerName: document.getElementById('customerName').value,
-            customerEmail: document.getElementById('customerEmail').value,
-            subject: document.getElementById('subject').value,
-            description: document.getElementById('description').value
-            };
-
-            try {
-                const response = await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(ticketData)
-                });
-
-                const result = await response.json();
-
-                loadingSpinner.classList.add('d-none');
-
-                if (result.success) {
-                document.getElementById('responseTicketId').textContent = result.ticketId;
-                document.getElementById('responseCategory').textContent = result.category.toUpperCase();
-                document.getElementById('responseDepartment').textContent = result.message.split('routed to ')[1] || 'Support Team';
-                    
-                    successAlert.classList.remove('d-none');
-                    this.reset();
-                    
-                    setTimeout(() => {
-                        successAlert.classList.add('d-none');
-                    }, 10000);
-                } else {
-                    throw new Error(result.error || 'Failed to submit ticket');
-                }
-            } catch (error) {
-                loadingSpinner.classList.add('d-none');
-                document.getElementById('errorMessage').textContent = error.message || 'Unable to submit ticket. Please try again or contact support directly.';
-                errorAlert.classList.remove('d-none');
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
 
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
