@@ -517,13 +517,13 @@
                                 <label for="customerName" class="form-label fw-semibold">
                                     <i class="bi bi-person"></i> Your Name <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" class="form-control" id="customerName" placeholder="John Doe" required>
+                                <input type="text" class="form-control" id="customerName" name="customerName" placeholder="John Doe" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="customerEmail" class="form-label fw-semibold">
                                     <i class="bi bi-envelope"></i> Email Address <span class="text-danger">*</span>
                                 </label>
-                                <input type="email" class="form-control" id="customerEmail" placeholder="john@example.com" required>
+                                <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="john@example.com" required>
                             </div>
                         </div>
 
@@ -531,14 +531,14 @@
                             <label for="subject" class="form-label fw-semibold">
                                 <i class="bi bi-chat-square-text"></i> Subject <span class="text-danger">*</span>
                             </label>
-                            <input type="text" class="form-control" id="subject" placeholder="Brief description of your issue" required>
+                            <input type="text" class="form-control" id="subject" name="subject" placeholder="Brief description of your issue" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="description" class="form-label fw-semibold">
                                 <i class="bi bi-card-text"></i> Description <span class="text-danger">*</span>
                             </label>
-                            <textarea class="form-control" id="description" rows="5" placeholder="Please provide detailed information about your issue..." required></textarea>
+                            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Please provide detailed information about your issue..." required></textarea>
                         </div>
 
                         <div class="d-grid gap-2">
