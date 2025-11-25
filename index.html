@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechForge Solutions - Support Ticket System</title>
+    <title>TechNova Solutions - Support Ticket System</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -299,7 +299,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-light fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="bi bi-code-slash"></i> TechForge</a>
+            <a class="navbar-brand" href="#"><i class="bi bi-code-slash"></i> TechNova</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -441,7 +441,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
-                    <h2 class="section-title">Why Choose TechForge?</h2>
+                    <h2 class="section-title">Why Choose TechNova?</h2>
                     <p class="lead mb-4">We are a team of passionate developers, designers, and strategists committed to delivering excellence.</p>
                     <ul class="list-unstyled">
                         <li class="mb-3"><i class="bi bi-check-circle-fill text-primary me-2"></i> Expert team with 10+ years of experience</li>
@@ -473,7 +473,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4 mb-4 mb-md-0">
-                    <h5 class="mb-3"><i class="bi bi-code-slash"></i> TechForge Solutions</h5>
+                    <h5 class="mb-3"><i class="bi bi-code-slash"></i> TechNova Solutions</h5>
                     <p class="text-muted">Building innovative software solutions for businesses worldwide.</p>
                 </div>
                 <div class="col-md-4 mb-4 mb-md-0">
@@ -497,7 +497,7 @@
             </div>
             <hr class="my-4 bg-secondary">
             <div class="text-center text-muted">
-                <p>&copy; 2025 TechForge Solutions. All rights reserved.</p>
+                <p>&copy; 2025 TechNova Solutions. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -511,7 +511,7 @@
                 </div>
                 <div class="modal-body p-4">
                     
-                    <form id="supportForm" method="POST" action="https://n8n.srv939400.hstgr.cloud/webhook-test/6c62bab4-f70a-4f40-b317-31f20adc8678">
+                    <form id="supportForm" method="POST" action="https://n8n.srv939400.hstgr.cloud/webhook-test/60cc6c8b-8489-43da-b9fb-57539b38c0ca">
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="customerName" class="form-label fw-semibold">
@@ -520,11 +520,18 @@
                                 <input type="text" class="form-control" id="customerName" name="customerName" placeholder="John Doe" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="customerEmail" class="form-label fw-semibold">
-                                    <i class="bi bi-envelope"></i> Email Address <span class="text-danger">*</span>
-                                </label>
-                                <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="john@example.com" required>
-                            </div>
+                                 <label for="email" class="form-label fw-semibold">
+                                     <i class="bi bi-envelope"></i> Email Address <span class="text-danger">*</span>
+                                 </label>
+                                 <input type="email" class="form-control" id="email" name="email" placeholder="john@example.com" required>
+                             </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="telephone" class="form-label fw-semibold">
+                                <i class="bi bi-telephone"></i> Telephone <span class="text-danger">*</span>
+                            </label>
+                            <input type="tel" class="form-control" id="telephone" name="telephone" placeholder="+1 (555) 123-4567" required>
                         </div>
 
                         <div class="mb-3">
@@ -535,10 +542,10 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="description" class="form-label fw-semibold">
-                                <i class="bi bi-card-text"></i> Description <span class="text-danger">*</span>
+                            <label for="message" class="form-label fw-semibold">
+                                <i class="bi bi-card-text"></i> Message Template <span class="text-danger">*</span>
                             </label>
-                            <textarea class="form-control" id="description" name="description" rows="5" placeholder="Please provide detailed information about your issue..." required></textarea>
+                            <textarea class="form-control" id="message" name="message" rows="5" placeholder="Please provide detailed information about your issue..." required></textarea>
                         </div>
 
                         <div class="d-grid gap-2">
