@@ -615,6 +615,7 @@
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@24.2.0/build/js/intlTelInput.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@24.2.0/build/css/intlTelInput.min.css">
     <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@24.2.0/build/js/utils.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
         AOS.init({
@@ -664,9 +665,84 @@
 
             // Format for submission (E164)
             document.getElementById('supportForm').addEventListener('submit', function(e) {
-                if (phoneInput.value.trim() && iti.isValidNumber()) {
-                    phoneInput.value = iti.getNumber(intlTelInputUtils.numberFormat.E164);
+                e.preventDefault();
+
+                // Validate phone
+                if (!phoneInput.value.trim() || !iti.isValidNumber()) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Phone',
+                        text: 'Please enter a valid phone number',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    return;
                 }
+
+                // Format phone to E164 for backend
+                const formattedPhone = iti.getNumber(intlTelInputUtils.numberFormat.E164);
+
+                // Get form data
+                const formData = {
+                    customerName: document.getElementById('customerName').value,
+                    email: document.getElementById('email').value,
+                    phone: formattedPhone,
+                    subject: document.getElementById('subject').value,
+                    message: document.getElementById('message').value
+                };
+
+                // Show loading alert
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Processing',
+                    text: 'Submitting your support ticket...',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Submit form
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Show success alert with user information
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Ticket Submitted!',
+                        html: `
+                            <div style="text-align: left; margin-top: 20px;">
+                                <p><strong>Name:</strong> ${formData.customerName}</p>
+                                <p><strong>Email:</strong> ${formData.email}</p>
+                                <p><strong>Phone:</strong> ${formData.phone}</p>
+                                <p><strong>Subject:</strong> ${formData.subject}</p>
+                                <hr>
+                                <p><small style="color: #666;"><i class="bi bi-envelope-check"></i> A confirmation email has been sent to your inbox.</small></p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#2563eb',
+                        confirmButtonText: 'Close'
+                    }).then(() => {
+                        // Reset form and close modal
+                        document.getElementById('supportForm').reset();
+                        bootstrap.Modal.getInstance(document.getElementById('supportModal')).hide();
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Submission Failed',
+                        text: 'There was an error submitting your ticket. Please try again.',
+                        confirmButtonColor: '#2563eb'
+                    });
+                });
             });
         }
 
