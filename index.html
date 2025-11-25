@@ -657,14 +657,17 @@
                         if (digits.length >= 9) {
                             phoneInput.value = `+256 ${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6, 9)}`;
                         }
-                    } else if (iti.isValidNumber()) {
+                    } else if (iti.isValidNumber() && typeof intlTelInputUtils !== 'undefined') {
                         phoneInput.value = iti.getNumber(intlTelInputUtils.numberFormat.INTERNATIONAL);
                     }
                 }
             });
 
             // Format for submission (E164)
-            document.getElementById('supportForm').addEventListener('submit', function(e) {
+            const supportForm = document.getElementById('supportForm');
+            const formActionUrl = supportForm.action;
+
+            supportForm.addEventListener('submit', function(e) {
                 e.preventDefault();
 
                 // Validate phone
@@ -679,7 +682,10 @@
                 }
 
                 // Format phone to E164 for backend
-                const formattedPhone = iti.getNumber(intlTelInputUtils.numberFormat.E164);
+                let formattedPhone = phoneInput.value;
+                if (typeof intlTelInputUtils !== 'undefined') {
+                    formattedPhone = iti.getNumber(intlTelInputUtils.numberFormat.E164);
+                }
 
                 // Get form data
                 const formData = {
@@ -703,19 +709,31 @@
                 });
 
                 // Submit form
-                fetch(this.action, {
+                fetch(formActionUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(formData)
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    // Try to parse as JSON, but don't fail if it's not
+                    return response.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch {
+                            return { success: true, data: text };
+                        }
+                    });
+                })
                 .then(data => {
                     // Show success alert with user information
                     Swal.fire({
                         icon: 'success',
-                        title: 'Ticket Submitted!',
+                        title: 'Ticket Submitted Successfully!',
                         html: `
                             <div style="text-align: left; margin-top: 20px;">
                                 <p><strong>Name:</strong> ${formData.customerName}</p>
@@ -730,16 +748,17 @@
                         confirmButtonText: 'Close'
                     }).then(() => {
                         // Reset form and close modal
-                        document.getElementById('supportForm').reset();
-                        bootstrap.Modal.getInstance(document.getElementById('supportModal')).hide();
+                        supportForm.reset();
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('supportModal'));
+                        if (modal) modal.hide();
                     });
                 })
                 .catch(error => {
-                    console.error('Error:', error);
+                    console.error('Submission error:', error);
                     Swal.fire({
                         icon: 'error',
                         title: 'Submission Failed',
-                        text: 'There was an error submitting your ticket. Please try again.',
+                        text: 'Error: ' + error.message,
                         confirmButtonColor: '#2563eb'
                     });
                 });
